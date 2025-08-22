@@ -2,7 +2,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { useState } from 'react';
-import Button from 'react-bootstrap/Button';
+import { Button } from 'react-bootstrap';
 
 import AppHeader from './components/AppHeader';
 import SelectQuiz from './components/SelectQuiz';

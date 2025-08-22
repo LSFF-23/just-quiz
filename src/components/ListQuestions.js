@@ -40,20 +40,22 @@ function ListQuestions ({handle, questions}) {
   
   return (
     <div className="list-container">
-      <div className="list-nav">
-        <div>
-          <Button onClick={decIndex}>&lt;</Button>
-          <Button onClick={incIndex}>&gt;</Button>
+      <div className="question-space">
+        <div className="list-nav">
+          <div>
+            <Button onClick={decIndex}>&lt;</Button>
+            <Button onClick={incIndex}>&gt;</Button>
+          </div>
+          <Button variant="success" onClick={() => handle(answerList)} disabled={answerCount !== 0}>Finalizar</Button>
         </div>
-        <Button variant="success" onClick={() => handle(answerList)} disabled={answerCount !== 0}>Finalizar</Button>
-      </div>
-      <div className="question-header">{questions[index].body}</div>
-      <div className="question-choices">
-        {questions[index].choices.map((v, i) =>
-          <label key={`label-${index}-${i}`}><input key={`input-${index}-${i}`} type="radio" name={"q" + index} onClick={() => chooseAnswer(index, i)} disabled={answerList[index] !== "#"} defaultChecked={(answerList[index] === "#")?false:(answerList[index] === i)?true:false}/> {v}</label>
-        )}
-      </div>
-      <div className="question-feedback">{(answerList[index] !== "#")?(questions[index].feedback):("")}</div>
+        <div className="question-header">{questions[index].body}</div>
+        <div className="question-choices">
+          {questions[index].choices.map((v, i) =>
+            <label key={`label-${index}-${i}`}><input key={`input-${index}-${i}`} type="radio" name={"q" + index} onClick={() => chooseAnswer(index, i)} disabled={answerList[index] !== "#"} defaultChecked={(answerList[index] === "#")?false:(answerList[index] === i)?true:false}/> {v}</label>
+          )}
+        </div>
+      </div>  
+      <div className="question-feedback">{(answerList[index] !== "#")?(questions[index].feedback):("")}</div>  
     </div>
   );
 }
