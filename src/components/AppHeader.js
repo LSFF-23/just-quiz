@@ -1,6 +1,8 @@
+import logo from '../assets/pica-pau.jpg';
+
 function AppHeader ({title}) {
   const HEADER_INFO = {
-    imageUrl: "https://i.pinimg.com/originals/89/d2/d5/89d2d5077c8b120644c47cd0551d01f9.jpg",
+    imageUrl: logo,
     imageSize: 100,
     headlineText: title
   };
