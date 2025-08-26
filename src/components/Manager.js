@@ -6,7 +6,7 @@ import questions from "./static/questions";
 function Manager () {
     const [data, setData] = useState(JSON.parse(localStorage.getItem("questions-data")) || questions);
     const [categories, setCategories] = useState(Object.keys(data));
-    const [catFeedback, setCatFeedback] = useState("");
+    const [categoryFeedback, setCategoryFeedback] = useState("");
 
     function addCategory () {
         const categorySelect = document.getElementById("new-category");
@@ -16,7 +16,7 @@ function Manager () {
         const newData = {...data};
         for (let i = 0; i < categories.length; i++) {
             if (categories[i].toLowerCase() === cValue.toLowerCase()) {
-                setCatFeedback(<span style={{color: "var(--bs-danger)"}}>A categoria {document.getElementById("new-category").value} já existe.</span>);
+                setCategoryFeedback(<span style={{color: "var(--bs-danger)"}}>A categoria {document.getElementById("new-category").value} já existe.</span>);
                 return;
             }
         }
@@ -25,12 +25,12 @@ function Manager () {
         
         setData(newData);
         setCategories(categories.concat([cValue]));
-        setCatFeedback(<span style={{color: "var(--bs-success)"}}>A categoria {document.getElementById("new-category").value} foi adicionada com sucesso!</span>);
+        setCategoryFeedback(<span style={{color: "var(--bs-success)"}}>A categoria {document.getElementById("new-category").value} foi adicionada com sucesso!</span>);
     }
 
     return (
-        <div>
-            <div className="manage-category">
+        <div className="list-container">
+            <div className="manage-category dark-container">
                 <label htmlFor="current-category">
                     Categoria
                     <select id="current-category" className="current-category">
@@ -45,8 +45,16 @@ function Manager () {
                     <Button variant="primary" onClick={addCategory}>Adicionar</Button>
                 </div>
                 <div id="add-success-failure">
-                    {catFeedback}
+                    {categoryFeedback}
                 </div>
+            </div>
+            <div className="manage-questions dark-container">
+                <label htmlFor="questions-category">
+                    Categoria
+                    <select id="questions-category" className="questions-category">
+                        {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
+                    </select>
+                </label>
             </div>
         </div>
     );
