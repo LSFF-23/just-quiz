@@ -10,6 +10,7 @@ import AppHeader from './components/AppHeader';
 import SelectQuiz from './components/SelectQuiz';
 import ListQuestions from './components/ListQuestions';
 import ReportScreen from './components/ReportScreen';
+import Manager from './components/Manager.js';
 
 function App () {
   const quiz_choices = Object.keys(questions_database);
@@ -19,6 +20,7 @@ function App () {
   const [showReport, setShowReport] = useState(false);
   const [reportData, setReportData] = useState({});
   const [questionList, setQuestionList] = useState([]);
+  const [showManager, setShowManager] = useState(false);
 
   function startQuiz (data, size) {
     const maxLength = Math.min(questions_database[data].length, size);
@@ -31,33 +33,48 @@ function App () {
       qCopy.correct = qCopy.choices.indexOf(cAnswer);
       qSubset.push(qCopy);
     }
+    setQuestionList(qSubset);
 
     setShowSelect(false);
     setShowQuestions(true);
     setShowReport(false);
-    setQuestionList(qSubset);
+    setShowManager(false);
   }
 
   function submitQuiz (data) {
     setReportData(data);
+
     setShowSelect(false);
     setShowQuestions(false);
     setShowReport(true);
+    setShowManager(false);
   }
 
   function selectScreen () {
     setShowSelect(true);
     setShowQuestions(false);
     setShowReport(false);
+    setShowManager(false);
+  }
+
+  function addQuestions () {
+    setShowSelect(false);
+    setShowQuestions(false);
+    setShowReport(false);
+    setShowManager(true);
   }
 
   return (
     <div className="App">
       <AppHeader title="Simulados"/>
       {showSelect?<SelectQuiz handle={startQuiz} quizChoices={quiz_choices}/>:<></>}
-      {!showSelect?<Button variant="secondary" onClick={selectScreen} style={{margin: "1rem 0"}}>Voltar</Button>:<></>}
+      <div className="top-btn-group">
+        {showSelect?<Button variant="primary" onClick={addQuestions}>Gerenciar</Button>:<></>}
+        {!showSelect?<Button variant="secondary" onClick={selectScreen}>Voltar</Button>:<></>}
+      </div>
       {showQuestions?<ListQuestions handle={submitQuiz} questions={questionList}/>:<></>}
       {showReport?<ReportScreen answers={reportData} questions={questionList}/>:<></>}
+      {showManager?<Manager/>:<></>}
     </div>
   );
 }

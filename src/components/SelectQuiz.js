@@ -31,7 +31,7 @@ function SelectQuiz ({handle, quizChoices}) {
         N° de questões
         <input id="questions-amount" type="number" min="1" defaultValue={localStorage.getItem("questions-amount") || 20} onChange={(e) => setLimit(e.target.value)}/>
       </label>
-      <Button variant="primary" onClick={() => {
+      <Button variant="success" onClick={() => {
         localStorage.setItem("quiz-choices", value.toString());
         localStorage.setItem("questions-amount", limit.toString());
         handle(value, limit);

@@ -1,3 +1,12 @@
+.top-btn-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  column-gap: 1em;
+  padding: 1em;
+}
+
+
 input[type='radio'].question-radio:after {
   width: 15px;
   height: 15px;
@@ -87,7 +96,7 @@ label.correct-choice {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1em 0;
+  padding: 1em 0 0 0;
   row-gap: 1em;
 
   select {
