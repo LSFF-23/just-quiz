@@ -2,11 +2,15 @@ import { useState } from "react";
 import { Button } from "react-bootstrap";
 
 import questions from "./static/questions";
+import { question2markdown, markdown2question, markdown_template } from "./static/util";
 
 function Manager () {
     const [data, setData] = useState(JSON.parse(localStorage.getItem("questions-data")) || questions);
     const [categories, setCategories] = useState(Object.keys(data));
     const [categoryFeedback, setCategoryFeedback] = useState("");
+    const [index, setIndex] = useState(0);
+    const [qCategory, setQCategory] = useState(categories[0]);
+    const [textValue, setTextValue] = useState(question2markdown(data[categories[0]][0]));
 
     function addCategory () {
         const categorySelect = document.getElementById("new-category");
@@ -29,32 +33,76 @@ function Manager () {
     }
 
     return (
-        <div className="list-container">
+        <div className="manager-container">
             <div className="manage-category dark-container">
                 <label htmlFor="current-category">
                     Categoria
-                    <select id="current-category" className="current-category">
-                        {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
-                    </select>
                 </label>
-                <div className="add-category">
-                    <label htmlFor="new-category">
-                        Nova Categoria:
-                        <input id="new-category" type="text"/>
-                    </label>
+                <select id="current-category" className="current-category">
+                    {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
+                </select>
+                <label htmlFor="new-category">
+                    Nova Categoria:
+                </label>
+                <div className="manager-input-btn-group">
+                    <input id="new-category" type="text"/>
                     <Button variant="primary" onClick={addCategory}>Adicionar</Button>
                 </div>
-                <div id="add-success-failure">
+                <div id="add-success-failure" style={{display: (categoryFeedback !== "")?"flex":"none"}}>
                     {categoryFeedback}
                 </div>
             </div>
             <div className="manage-questions dark-container">
-                <label htmlFor="questions-category">
-                    Categoria
-                    <select id="questions-category" className="questions-category">
-                        {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
-                    </select>
-                </label>
+                <div className="questions-container">
+                    <label htmlFor="questions-category">
+                        Categoria
+                        <select id="questions-category" className="questions-category" onChange={(e) => {
+                            setQCategory(e.target.value);
+                            setTextValue(question2markdown(data[e.target.value][index] || {}));
+                        }}>
+                            {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
+                        </select>
+                    </label>
+                    <div>
+                        <Button variant="secondary" onClick={() => {
+                            if (index === 0) return;
+                            setIndex(index - 1);
+                        }}>&lt;</Button>
+                        <input style={{textAlign: "center"}} type="text" disabled value={`${Math.min(index + 1, data[qCategory].length)} / ${data[qCategory].length}`}/>
+                        <Button variant="secondary" onClick={() => {
+                            if (index >= data[qCategory].length - 1) return;
+                            setIndex(index + 1);
+                        }}>&gt;</Button>
+                    </div>
+                    <textarea placeholder="Digite as questões..." id="question-markdown" value={textValue} onChange={(e) => setTextValue(e.target.value)}/>
+                    <div className="manager-controls">
+                        <div>
+                            <Button variant="danger">Deletar</Button>
+                            <Button variant="light" onClick={() => setTextValue(markdown_template)}>Resetar</Button>
+                            <Button variant="success">Salvar</Button>
+                            <Button variant="primary" onClick={() => {
+                                const text = document.getElementById("question-markdown").value;
+                                const newData = {...data};
+                                const questionObject = markdown2question(text);
+                                if (questionObject !== null) {
+                                    newData[qCategory].push(questionObject);
+                                    setData(newData);
+                                }
+                            }}>Adicionar</Button>
+                        </div>
+                    </div>
+                </div>
+                <div className="question-space">
+                    <div className="question-header">{(data[qCategory].length === 0)?"":data[qCategory][index].body}</div>
+                    <div className="question-choices">
+                        {   
+                            (data[qCategory].length === 0)?"":
+                            data[qCategory][index].choices.map((v, i) =>
+                                <label className={(data[qCategory][index].correct === i)?"correct-choice":""} key={`manager-label-${index}-${i}`}><input className="question-radio" key={`manager-input-${index}-${i}`} type="radio" name={"q" + index} disabled={true} defaultChecked={data[qCategory][index].correct === i}/> {v}</label>
+                            )
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     );
