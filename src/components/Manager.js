@@ -11,6 +11,7 @@ function Manager () {
     const [index, setIndex] = useState(0);
     const [qCategory, setQCategory] = useState(categories[0]);
     const [textValue, setTextValue] = useState(question2markdown(data[categories[0]][0]));
+    const [editMode, setEditMode] = useState("questions");
 
     function addCategory () {
         const categorySelect = document.getElementById("new-category");
@@ -25,18 +26,22 @@ function Manager () {
             }
         }
         newData[cValue] = [];
-        localStorage.setItem("questions-data", JSON.stringify(newData));
         
         setData(newData);
-        setCategories(categories.concat([cValue]));
+        setCategories(categories.concat(cValue));
         setCategoryFeedback(<span style={{color: "var(--bs-success)"}}>A categoria {document.getElementById("new-category").value} foi adicionada com sucesso!</span>);
     }
 
     return (
         <div className="manager-container">
+            <div className="manager-radiogroup">
+                <label><input name="interface-choice" type="radio" value="questions" onChange={(e) => setEditMode(e.target.value)} checked={editMode === "questions"}/> Questões</label>
+                <label><input name="interface-choice" type="radio" value="categories" onChange={(e) => setEditMode(e.target.value)} checked={editMode === "categories"}/> Categorias</label>
+            </div>
+            {(editMode === "categories")?
             <div className="manage-category dark-container">
                 <label htmlFor="current-category">
-                    Categoria
+                    Categorias
                 </label>
                 <select id="current-category" className="current-category">
                     {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
@@ -48,10 +53,11 @@ function Manager () {
                     <input id="new-category" type="text"/>
                     <Button variant="primary" onClick={addCategory}>Adicionar</Button>
                 </div>
-                <div id="add-success-failure" style={{display: (categoryFeedback !== "")?"flex":"none"}}>
+                <div id="add-success-failure" style={{display: (categoryFeedback !== "")?"flex":"none", justifyContent: "center"}}>
                     {categoryFeedback}
                 </div>
-            </div>
+            </div>:<></>}
+            {(editMode === "questions")?
             <div className="manage-questions dark-container">
                 <div className="questions-container">
                     <label htmlFor="questions-category">
@@ -87,6 +93,7 @@ function Manager () {
                                 if (questionObject !== null) {
                                     newData[qCategory].push(questionObject);
                                     setData(newData);
+                                    localStorage.setItem("questions-data", JSON.stringify(newData));
                                 }
                             }}>Adicionar</Button>
                         </div>
@@ -103,7 +110,7 @@ function Manager () {
                         }
                     </div>
                 </div>
-            </div>
+            </div>:<></>}
         </div>
     );
 }
