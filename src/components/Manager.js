@@ -83,9 +83,16 @@ function Manager () {
                     <textarea placeholder="Digite as questões..." id="question-markdown" value={textValue} onChange={(e) => setTextValue(e.target.value)}/>
                     <div className="manager-controls">
                         <div>
-                            <Button variant="danger">Deletar</Button>
+                            <Button variant="danger" onClick={() => {
+                                const newData = {...data};
+                                newData[qCategory][index] && delete newData[qCategory][index];
+                                setData(newData);
+                                setIndex(Math.max(0, index - 1));
+                            }}>Deletar</Button>
                             <Button variant="light" onClick={() => setTextValue(markdown_template)}>Resetar</Button>
-                            <Button variant="success">Salvar</Button>
+                            <Button variant="success" onClick={() => {
+                                const a = 0;
+                            }}>Salvar</Button>
                             <Button variant="primary" onClick={() => {
                                 const text = document.getElementById("question-markdown").value;
                                 const newData = {...data};
