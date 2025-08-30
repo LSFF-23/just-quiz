@@ -10,7 +10,7 @@ function Manager () {
     const [categoryFeedback, setCategoryFeedback] = useState("");
     const [index, setIndex] = useState(0);
     const [qCategory, setQCategory] = useState(categories[0]);
-    const [textValue, setTextValue] = useState(question2markdown(data[categories[0]][0]));
+    const [textValue, setTextValue] = useState(question2markdown(data[categories[0]][0] || {}));
     const [editMode, setEditMode] = useState("questions");
 
     function addCategory () {
@@ -30,6 +30,15 @@ function Manager () {
         setData(newData);
         setCategories(categories.concat(cValue));
         setCategoryFeedback(<span style={{color: "var(--bs-success)"}}>A categoria {document.getElementById("new-category").value} foi adicionada com sucesso!</span>);
+    }
+
+    function saveData (data) {
+        const newData = {...data};
+        const dCategories = Object.keys(newData);
+        for (let i = 0; i < dCategories.length; i++)
+            if (newData[dCategories[i]] && newData[dCategories[i]].length === 0)
+                delete newData[dCategories[i]];
+        localStorage.setItem("questions-data", JSON.stringify(newData));
     }
 
     return (
@@ -64,7 +73,8 @@ function Manager () {
                         Categoria
                         <select id="questions-category" className="questions-category" onChange={(e) => {
                             setQCategory(e.target.value);
-                            setTextValue(question2markdown(data[e.target.value][index] || {}));
+                            const d = data[e.target.value][index] || {};
+                            setTextValue(question2markdown(d));
                         }}>
                             {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
                         </select>
@@ -74,7 +84,9 @@ function Manager () {
                             if (index === 0) return;
                             setIndex(index - 1);
                         }}>&lt;</Button>
-                        <input style={{textAlign: "center"}} type="text" disabled value={`${Math.min(index + 1, data[qCategory].length)} / ${data[qCategory].length}`}/>
+                        <input style={{textAlign: "center"}} type="text" disabled value={(() => {
+                            return `${Math.min(index + 1, data[qCategory].length)} / ${data[qCategory].length}`;
+                        })()}/>
                         <Button variant="secondary" onClick={() => {
                             if (index >= data[qCategory].length - 1) return;
                             setIndex(index + 1);
@@ -85,13 +97,17 @@ function Manager () {
                         <div>
                             <Button variant="danger" onClick={() => {
                                 const newData = {...data};
-                                newData[qCategory][index] && delete newData[qCategory][index];
+                                const newIndex = Math.max(0, index - 1)
+                                newData[qCategory][index] && newData[qCategory].splice(index, 1);
+                                console.log(newData);
                                 setData(newData);
-                                setIndex(Math.max(0, index - 1));
+                                setIndex(newIndex);
+                                setTextValue(question2markdown(data[qCategory][newIndex] || {}));
+                                saveData(newData);
                             }}>Deletar</Button>
                             <Button variant="light" onClick={() => setTextValue(markdown_template)}>Resetar</Button>
                             <Button variant="success" onClick={() => {
-                                const a = 0;
+                                return;
                             }}>Salvar</Button>
                             <Button variant="primary" onClick={() => {
                                 const text = document.getElementById("question-markdown").value;
@@ -100,14 +116,16 @@ function Manager () {
                                 if (questionObject !== null) {
                                     newData[qCategory].push(questionObject);
                                     setData(newData);
-                                    localStorage.setItem("questions-data", JSON.stringify(newData));
+                                    saveData(newData);
                                 }
                             }}>Adicionar</Button>
                         </div>
                     </div>
                 </div>
                 <div className="question-space">
-                    <div className="question-header">{(data[qCategory].length === 0)?"":data[qCategory][index].body}</div>
+                    <div className="question-header">{(data[qCategory].length === 0)?"":(() => {
+                        return data[qCategory][index].body;
+                    })()}</div>
                     <div className="question-choices">
                         {   
                             (data[qCategory].length === 0)?"":
