@@ -1,3 +1,15 @@
+#add-success-failure {
+  grid-column: 1 / 3;
+  justify-content: center;
+}
+
+#manager-import-export {
+  grid-column: 1 / 3;
+  display: flex;
+  justify-content: center;
+  column-gap: 1em;
+}
+
 .questions-container .same-height {
   height: 2em;
   box-sizing: border-box;

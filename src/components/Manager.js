@@ -62,8 +62,12 @@ function Manager () {
                             <input className="same-height" id="new-category" type="text"/>
                             <Button className="same-height" variant="primary" onClick={addCategory}>Adicionar</Button>
                         </div>
-                        <div id="add-success-failure" style={{display: (categoryFeedback !== "")?"flex":"none", justifyContent: "center"}}>
+                        <div id="add-success-failure" style={{display: (categoryFeedback !== "")?"flex":"none"}}>
                             {categoryFeedback}
+                        </div>
+                        <div id="manager-import-export">
+                            <Button variant="primary">Exportar</Button>
+                            <Button variant="primary">Importar</Button>
                         </div>
                     </div>
                     <div className="d-flex flex-row gap-2 align-items-center">
