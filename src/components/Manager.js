@@ -1,16 +1,26 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "react-bootstrap";
 
 import questions from "./static/questions";
-import { question2markdown, markdown2question, markdown_template } from "./static/util";
+import { question2markdown, markdown2question, markdown_template, importJSON, exportJSON } from "./static/util";
+
+const OBJECT_NAME = "questions-data";
 
 function Manager () {
-    const [data, setData] = useState(JSON.parse(localStorage.getItem("questions-data")) || questions);
+    const [data, setData] = useState(() => {
+        const lsData = JSON.parse(localStorage.getItem(OBJECT_NAME));
+        if (lsData === null) {
+            localStorage.setItem(OBJECT_NAME, JSON.stringify(questions));
+            return questions;
+        }
+        return lsData;
+    });
     const [categories, setCategories] = useState(Object.keys(data));
     const [categoryFeedback, setCategoryFeedback] = useState("");
     const [index, setIndex] = useState(0);
     const [qCategory, setQCategory] = useState(categories[0]);
-    const [textValue, setTextValue] = useState(question2markdown(data[categories[0]][0] || {}));
+    const [textValue, setTextValue] = useState(question2markdown(data[categories[0]][0]));
+    const fileInputRef = useRef(null);
 
     function addCategory () {
         const categorySelect = document.getElementById("new-category");
@@ -37,7 +47,7 @@ function Manager () {
         for (let i = 0; i < dCategories.length; i++)
             if (newData[dCategories[i]] && newData[dCategories[i]].length === 0)
                 delete newData[dCategories[i]];
-        localStorage.setItem("questions-data", JSON.stringify(newData));
+        localStorage.setItem(OBJECT_NAME, JSON.stringify(newData));
     }
 
     return (
@@ -66,8 +76,33 @@ function Manager () {
                             {categoryFeedback}
                         </div>
                         <div id="manager-import-export">
-                            <Button variant="primary">Exportar</Button>
-                            <Button variant="primary">Importar</Button>
+                            <input type="file" ref={fileInputRef} onChange={(e) => {
+                                const previousData = JSON.parse(localStorage.getItem(OBJECT_NAME));
+                                const previousTextValue = textValue;
+                                const previousQCategory = qCategory;
+                                const previousCategories = categories;
+                                const previousIndex = index;
+
+                                const result = importJSON(e, OBJECT_NAME);
+                                if (result === true) {
+                                    const newData = JSON.parse(localStorage.getItem(OBJECT_NAME));
+                                    setData(newData);
+                                    setTextValue(question2markdown(data[Object.keys(newData)[0]][0]));
+                                    setQCategory(Object.keys(newData)[0]);
+                                    setCategories(Object.keys(newData));
+                                    setIndex(0);
+                                    return;
+                                }
+
+                                localStorage.setItem(OBJECT_NAME, JSON.stringify(previousData));
+                                setData(previousData);
+                                setTextValue(previousTextValue);
+                                setQCategory(previousQCategory);
+                                setCategories(previousCategories);
+                                setIndex(previousIndex);
+                            }} style={{ display: 'none' }}/>
+                            <Button variant="primary" onClick={() => exportJSON(OBJECT_NAME)}>Exportar</Button>
+                            <Button variant="primary" onClick={() => fileInputRef.current.click()}>Importar</Button>
                         </div>
                     </div>
                     <div className="d-flex flex-row gap-2 align-items-center">
@@ -89,7 +124,6 @@ function Manager () {
                             const newData = {...data};
                             const newIndex = Math.max(0, index - 1)
                             newData[qCategory][index] && newData[qCategory].splice(index, 1);
-                            console.log(newData);
                             setData(newData);
                             setIndex(newIndex);
                             setTextValue(question2markdown(data[qCategory][newIndex] || {}));
@@ -97,7 +131,7 @@ function Manager () {
                         }}>Deletar</Button>
                         <Button variant="light" onClick={() => setTextValue(markdown_template)}>Resetar</Button>
                         <Button variant="success" onClick={() => {
-                            const lsData = JSON.parse(localStorage.getItem("questions-data"));
+                            const lsData = JSON.parse(localStorage.getItem(OBJECT_NAME));
                             const typedQuestion = markdown2question(textValue);
                             if (typedQuestion === null) return;
                             lsData[qCategory][index] = typedQuestion;
