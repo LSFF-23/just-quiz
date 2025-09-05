@@ -18,16 +18,21 @@ export function shuffle (array) {
 export const markdown_template = `[q][/q]\n[r][/r]\n[o][/o]\n[o][/o]\n[o][/o]\n[f][/f]`;
 
 export function question2markdown (question) {
-  if (!("body" in question) || !("choices" in question) || !("correct" in question) || !("feedback" in question)) return markdown_template;
-
-  const markdown = [];
-  markdown.push(`[q]${question.body}[/q]`);
-  for (let i = 0; i < question.choices.length; i++) {
-    if (i === question.correct) markdown.push(`[r]${question.choices[i]}[/r]`);
-    else markdown.push(`[o]${question.choices[i]}[/o]`);
+  // if (!("body" in question) || !("choices" in question) || !("correct" in question) || !("feedback" in question)) return markdown_template;
+  try {
+    const markdown = [];
+    markdown.push(`[q]${question.body}[/q]`);
+    for (let i = 0; i < question.choices.length; i++) {
+      if (i === question.correct) markdown.push(`[r]${question.choices[i]}[/r]`);
+      else markdown.push(`[o]${question.choices[i]}[/o]`);
+    }
+    markdown.push(`[f]${question.feedback}[/f]`);
+    return markdown.join("\n");
   }
-  markdown.push(`[f]${question.feedback}[/f]`);
-  return markdown.join("\n");
+  catch (e) {
+    // console.log(`${JSON.stringify(question)}`);
+    return markdown_template;
+  }
 }
 
 export function markdown2question (markdown) {

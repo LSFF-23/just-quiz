@@ -9,9 +9,9 @@ const OBJECT_NAME = "questions-data";
 function Manager () {
     const [data, setData] = useState(() => {
         const lsData = JSON.parse(localStorage.getItem(OBJECT_NAME));
-        if (lsData === null) {
+        if (lsData === null || Object.keys(lsData).length === 0) {
             localStorage.setItem(OBJECT_NAME, JSON.stringify(questions));
-            return questions;
+            return structuredClone(questions);
         }
         return lsData;
     });
@@ -70,36 +70,26 @@ function Manager () {
       }
     }
 
-    function importJSON (event) {
+    async function importJSON (event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const parsedData = JSON.parse(e.target.result);  
-                if (typeof parsedData !== 'object' || parsedData === null) {
-                    return;
-                }
-                localStorage.setItem(OBJECT_NAME, JSON.stringify(parsedData));
-                setData(parsedData);
-            } catch (error) {
-                console.error(error);
+        const text = await file.text();
+        try {
+            const parsedData = JSON.parse(text);  
+            if (typeof parsedData !== 'object' || parsedData === null) {
                 return;
             }
-        };
-        reader.onerror = function() {
+            localStorage.setItem(OBJECT_NAME, JSON.stringify(parsedData));
+            setData(parsedData);
+        } catch (error) {
+            console.error(error);
             return;
-        };
-        reader.readAsText(file);
-        
+        }
+
         event.target.value = '';
 
         return true;
-    }
-
-    function importJSONv2 () {
-        
     }
 
     return (
@@ -128,18 +118,18 @@ function Manager () {
                             {categoryFeedback}
                         </div>
                         <div id="manager-import-export">
-                            <input type="file" ref={fileInputRef} onChange={(e) => {
+                            <input type="file" ref={fileInputRef} onChange={async (e) => {
                                 const previousData = JSON.parse(localStorage.getItem(OBJECT_NAME));
                                 const previousTextValue = textValue;
                                 const previousQCategory = qCategory;
                                 const previousCategories = categories;
                                 const previousIndex = index;
 
-                                const result = importJSON(e);
+                                const result = await importJSON(e);
                                 if (result === true) {
                                     const newData = JSON.parse(localStorage.getItem(OBJECT_NAME));
                                     setData(newData);
-                                    setTextValue(question2markdown(data[Object.keys(newData)[0]][0]));
+                                    setTextValue(question2markdown(newData[Object.keys(newData)[0]][0]));
                                     setQCategory(Object.keys(newData)[0]);
                                     setCategories(Object.keys(newData));
                                     setIndex(0);
