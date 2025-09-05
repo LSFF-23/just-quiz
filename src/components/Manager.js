@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Button } from "react-bootstrap";
 
 import questions from "./static/questions";
-import { question2markdown, markdown2question, markdown_template, importJSON, exportJSON } from "./static/util";
+import { question2markdown, markdown2question, markdown_template} from "./static/util";
 
 const OBJECT_NAME = "questions-data";
 
@@ -41,13 +41,65 @@ function Manager () {
         setCategoryFeedback(<span style={{color: "var(--bs-success)"}}>A categoria {document.getElementById("new-category").value} foi adicionada com sucesso!</span>);
     }
 
-    function saveData (data) {
-        const newData = {...data};
+    function saveData (fData) {
+        const newData = {...fData};
         const dCategories = Object.keys(newData);
         for (let i = 0; i < dCategories.length; i++)
             if (newData[dCategories[i]] && newData[dCategories[i]].length === 0)
                 delete newData[dCategories[i]];
         localStorage.setItem(OBJECT_NAME, JSON.stringify(newData));
+    }
+
+    function exportJSON () {
+      try {
+        const stringData = JSON.parse(localStorage.getItem(OBJECT_NAME));
+    
+        if (Object.keys(stringData).length === 0) return;
+        const jsonData = JSON.stringify(stringData);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${OBJECT_NAME}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function importJSON (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsedData = JSON.parse(e.target.result);  
+                if (typeof parsedData !== 'object' || parsedData === null) {
+                    return;
+                }
+                localStorage.setItem(OBJECT_NAME, JSON.stringify(parsedData));
+                setData(parsedData);
+            } catch (error) {
+                console.error(error);
+                return;
+            }
+        };
+        reader.onerror = function() {
+            return;
+        };
+        reader.readAsText(file);
+        
+        event.target.value = '';
+
+        return true;
+    }
+
+    function importJSONv2 () {
+        
     }
 
     return (
@@ -83,7 +135,7 @@ function Manager () {
                                 const previousCategories = categories;
                                 const previousIndex = index;
 
-                                const result = importJSON(e, OBJECT_NAME);
+                                const result = importJSON(e);
                                 if (result === true) {
                                     const newData = JSON.parse(localStorage.getItem(OBJECT_NAME));
                                     setData(newData);
@@ -101,7 +153,7 @@ function Manager () {
                                 setCategories(previousCategories);
                                 setIndex(previousIndex);
                             }} style={{ display: 'none' }}/>
-                            <Button variant="primary" onClick={() => exportJSON(OBJECT_NAME)}>Exportar</Button>
+                            <Button variant="primary" onClick={exportJSON}>Exportar</Button>
                             <Button variant="primary" onClick={() => fileInputRef.current.click()}>Importar</Button>
                         </div>
                     </div>
