@@ -15,6 +15,7 @@ function Manager () {
         }
         return lsData;
     });
+    
     const [categories, setCategories] = useState(Object.keys(data));
     const [categoryFeedback, setCategoryFeedback] = useState("");
     const [index, setIndex] = useState(0);
@@ -104,6 +105,7 @@ function Manager () {
                             setQCategory(e.target.value);
                             const d = data[e.target.value][index] || {};
                             setTextValue(question2markdown(d));
+                            setIndex(0);
                         }}>
                             {categories.map((v, i) => <option key={"cg"+v+i} value={v}>{v}</option>)}
                         </select>
@@ -151,6 +153,7 @@ function Manager () {
                         <Button variant="secondary" onClick={() => {
                             if (index === 0) return;
                             setIndex(index - 1);
+                            setTextValue(question2markdown(data[qCategory][index - 1]));
                         }}>&lt;</Button>
                         <div style={{textAlign: "center"}}>
                             {`${Math.min(index + 1, data[qCategory].length)} / ${data[qCategory].length}`}
@@ -158,6 +161,7 @@ function Manager () {
                         <Button variant="secondary" onClick={() => {
                             if (index >= data[qCategory].length - 1) return;
                             setIndex(index + 1);
+                            setTextValue(question2markdown(data[qCategory][index + 1]));
                         }}>&gt;</Button>
                     </div>
                     <textarea placeholder="Digite as questões..." id="question-markdown" value={textValue} onChange={(e) => setTextValue(e.target.value)}/>

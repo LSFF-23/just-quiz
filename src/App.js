@@ -1,6 +1,6 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import questions_database from "./components/static/questions";
+import questions from "./components/static/questions";
 import { shuffle } from './components/static/util.js';
 
 import { useState } from 'react';
@@ -12,8 +12,17 @@ import ListQuestions from './components/ListQuestions';
 import ReportScreen from './components/ReportScreen';
 import Manager from './components/Manager.js';
 
+const OBJECT_NAME = "questions-data";
+
 function App () {
-  const quiz_choices = Object.keys(questions_database);
+  const [data, setData] = useState(() => {
+    const lsData = JSON.parse(localStorage.getItem(OBJECT_NAME));
+    if (lsData === null || Object.keys(lsData).length === 0) {
+        localStorage.setItem(OBJECT_NAME, JSON.stringify(questions));
+        return structuredClone(questions);
+    }
+    return lsData;
+  });
 
   const [showSelect, setShowSelect] = useState(true);
   const [showQuestions, setShowQuestions] = useState(false);
@@ -22,10 +31,10 @@ function App () {
   const [questionList, setQuestionList] = useState([]);
   const [showManager, setShowManager] = useState(false);
 
-  function startQuiz (data, size) {
-    const maxLength = Math.min(questions_database[data].length, size);
+  function startQuiz (category, size) {
+    const maxLength = Math.min(data[category].length, size);
     const qSubset = [];
-    const shuffledQuestions = shuffle(questions_database[data]);
+    const shuffledQuestions = shuffle(data[category]);
     for (let i = 0; i < maxLength; i++) {
       const qCopy = {...shuffledQuestions[i]};
       const cAnswer = qCopy.choices[qCopy.correct];
@@ -51,6 +60,15 @@ function App () {
   }
 
   function selectScreen () {
+    const lsData = JSON.parse(localStorage.getItem(OBJECT_NAME));
+    if (lsData === null || Object.keys(lsData).length === 0) {
+      localStorage.setItem(OBJECT_NAME, JSON.stringify(questions));
+      setData(structuredClone(questions));
+    }
+    else {
+      setData(lsData);
+    }
+
     setShowSelect(true);
     setShowQuestions(false);
     setShowReport(false);
@@ -67,7 +85,7 @@ function App () {
   return (
     <div className="App">
       <AppHeader title="Simulados"/>
-      {showSelect?<SelectQuiz handle={startQuiz} quizChoices={quiz_choices}/>:<></>}
+      {showSelect?<SelectQuiz handle={startQuiz} categories={Object.keys(data)}/>:<></>}
       <div className="top-btn-group">
         {showSelect?<Button variant="primary" onClick={addQuestions}>Gerenciar</Button>:<></>}
         {!showSelect?<Button variant="secondary" onClick={selectScreen}>Voltar</Button>:<></>}

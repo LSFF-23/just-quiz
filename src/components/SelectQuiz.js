@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 
-function SelectQuiz ({handle, quizChoices}) {
+function SelectQuiz ({handle, categories}) {
   const [value, setValue] = useState("");
   const [limit, setLimit] = useState(0);
 
-  const selectOptions = quizChoices.map(v => <option key={v.toString()} value={v}>{v}</option>);
+  const selectOptions = categories.map(v => <option key={v.toString()} value={v}>{v}</option>);
 
   useEffect(() => {
     const selectElement = document.getElementById("quiz-choices");
